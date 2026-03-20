@@ -1,26 +1,28 @@
 interface classes {
   container: string;
+
   filterGroup: string;
   filterGroupHeader: string;
   filterGroupContent: string;
 
-  filterGroupHeaderInputAndOrSelect: string;
-  filterGroupHeaderInputAndOrOption: string;
-  filterGroupHeaderButtonAddField: string;
-  filterGroupHeaderButtonAddGroup: string;
-  filterGroupHeaderButtonRemove: string;
+  filterGroupHeaderAndOrSelect: string;
+  filterGroupHeaderAndOrOption: string;
+  filterGroupHeaderAddFieldButton: string;
+  filterGroupHeaderAddGroupButton: string;
+  filterGroupHeaderRemoveButton: string;
 
   filterGroupFieldContainer: string;
   filterGroupFieldInput: string;
   filterGroupFieldSelect: string;
   filterGroupFieldOption: string;
+  filterGroupFieldRemoveButton: string;
 }
 
-// todo unify
-const attributeTypes: string[] = ["number", "string"];
-type attributeType = "number" | "string" | "datetime";
+const attributeTypes = ["number", "string", "datetime"] as const;
+type attributeType = (typeof attributeTypes)[number];
 
-type filterType = "equal" | "not equal" | "less than" | "greater than";
+const filterTypes = ["equal", "not equal", "less than", "greater than"];
+type filterType = (typeof filterTypes)[number];
 
 interface attribute {
   name: string;
@@ -144,6 +146,7 @@ class qb {
       const option = document.createElement("option");
       option.className = this.cfg.classes?.filterGroupFieldOption || "";
       option.value = opt.name;
+      option.innerText = opt.name;
       selectAttribute.appendChild(option);
     }
 
@@ -151,10 +154,11 @@ class qb {
     const selectType = document.createElement("select");
     selectType.className = this.cfg.classes?.filterGroupFieldSelect || "";
 
-    for (const opt of attributeTypes) {
+    for (const opt of filterTypes) {
       const option = document.createElement("option");
       option.className = this.cfg.classes?.filterGroupFieldOption || "";
       option.value = opt;
+      option.innerText = opt;
       selectType.appendChild(option);
     }
 
@@ -164,6 +168,7 @@ class qb {
 
     // remove
     const remove = document.createElement("button");
+    remove.className = this.cfg.classes?.filterGroupFieldRemoveButton || "";
     remove.innerText = "Remove";
     remove.addEventListener("click", () => {
       parent.removeChild(container);
@@ -186,21 +191,21 @@ class qb {
 
   private newFilterGroupHeaderAddField(): Node {
     const btn = document.createElement("button");
-    btn.className = this.cfg.classes?.filterGroupHeaderButtonAddField || "";
+    btn.className = this.cfg.classes?.filterGroupHeaderAddFieldButton || "";
     btn.innerText = "add field";
     return btn;
   }
 
   private newFilterGroupHeaderAddGroup(): Node {
     const btn = document.createElement("button");
-    btn.className = this.cfg.classes?.filterGroupHeaderButtonAddGroup || "";
+    btn.className = this.cfg.classes?.filterGroupHeaderAddGroupButton || "";
     btn.innerText = "add group";
     return btn;
   }
 
   private newFilterGroupHeaderRemove(removable: boolean): Node {
     const btn = document.createElement("button");
-    btn.className = this.cfg.classes?.filterGroupHeaderButtonRemove || "";
+    btn.className = this.cfg.classes?.filterGroupHeaderRemoveButton || "";
     btn.disabled = !removable;
     btn.innerText = "remove";
     return btn;
@@ -208,13 +213,13 @@ class qb {
 
   private newFilterGroupHeaderAndOr(): Node {
     const andOr = document.createElement("select");
-    andOr.className = this.cfg.classes?.filterGroupHeaderInputAndOrSelect || "";
+    andOr.className = this.cfg.classes?.filterGroupHeaderAndOrSelect || "";
 
     for (const opt of ["and", "or"]) {
       const option = document.createElement("option");
-      option.className =
-        this.cfg.classes?.filterGroupHeaderInputAndOrOption || "";
+      option.className = this.cfg.classes?.filterGroupHeaderAndOrOption || "";
       option.value = opt;
+      option.innerText = opt;
       andOr.appendChild(option);
     }
 
