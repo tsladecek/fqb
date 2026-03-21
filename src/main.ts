@@ -1,21 +1,124 @@
-interface classes {
-  container: string;
+interface nodes {
+  container: () => HTMLDivElement;
 
-  filterGroup: string;
-  filterGroupHeader: string;
-  filterGroupContent: string;
+  filterGroup: () => HTMLDivElement;
+  filterGroupHeader: () => HTMLDivElement;
+  filterGroupContent: () => HTMLDivElement;
 
-  filterGroupHeaderAndOrSelect: string;
-  filterGroupHeaderAndOrOption: string;
-  filterGroupHeaderAddFieldButton: string;
-  filterGroupHeaderAddGroupButton: string;
-  filterGroupHeaderRemoveButton: string;
+  filterGroupHeaderAndOrSelect: () => HTMLSelectElement;
+  filterGroupHeaderAndOrOption: () => HTMLOptionElement;
+  filterGroupHeaderAddFieldButton: () => HTMLButtonElement;
+  filterGroupHeaderAddGroupButton: () => HTMLButtonElement;
+  filterGroupHeaderRemoveButton: () => HTMLButtonElement;
 
-  filterGroupFieldContainer: string;
-  filterGroupFieldInput: string;
-  filterGroupFieldSelect: string;
-  filterGroupFieldOption: string;
-  filterGroupFieldRemoveButton: string;
+  filterGroupFieldContainer: () => HTMLDivElement;
+  filterGroupFieldInput: () => HTMLInputElement;
+  filterGroupFieldAttributeSelect: () => HTMLSelectElement;
+  filterGroupFieldAttributeOption: () => HTMLOptionElement;
+  filterGroupFieldOperatorSelect: () => HTMLSelectElement;
+  filterGroupFieldOperatorOption: () => HTMLOptionElement;
+  filterGroupFieldRemoveButton: () => HTMLButtonElement;
+}
+
+const classPrefix = "queryBuilder";
+
+function elementFactory<K extends keyof HTMLElementTagNameMap>(
+  type: K,
+  className: string,
+  provided?: () => HTMLElementTagNameMap[K],
+): () => HTMLElementTagNameMap[K] {
+  return () => {
+    let element = document.createElement(type);
+    if (provided) {
+      element = provided();
+    }
+
+    element.classList.add(`${classPrefix}${className}`);
+    return element;
+  };
+}
+
+function newNodes(nodes?: nodes): nodes {
+  return {
+    container: elementFactory("div", "Container", nodes?.container),
+
+    // FilterGroup
+    filterGroup: elementFactory("div", "FilterGroup", nodes?.filterGroup),
+    filterGroupHeader: elementFactory(
+      "div",
+      "FilterGroupHeader",
+      nodes?.filterGroupHeader,
+    ),
+    filterGroupContent: elementFactory(
+      "div",
+      "FilterGroupContent",
+      nodes?.filterGroupContent,
+    ),
+
+    // FilterGroupHeader
+    filterGroupHeaderAndOrSelect: elementFactory(
+      "select",
+      "HeaderAndOrSelect",
+      nodes?.filterGroupHeaderAndOrSelect,
+    ),
+    filterGroupHeaderAndOrOption: elementFactory(
+      "option",
+      "HeaderAndOrOption",
+      nodes?.filterGroupHeaderAndOrOption,
+    ),
+    filterGroupHeaderAddFieldButton: elementFactory(
+      "button",
+      "HeaderAddFieldButton",
+      nodes?.filterGroupHeaderAddFieldButton,
+    ),
+    filterGroupHeaderAddGroupButton: elementFactory(
+      "button",
+      "HeaderAddGroupButton",
+      nodes?.filterGroupHeaderAddGroupButton,
+    ),
+    filterGroupHeaderRemoveButton: elementFactory(
+      "button",
+      "HeaderRemoveButton",
+      nodes?.filterGroupHeaderRemoveButton,
+    ),
+
+    // FilterGroupContent - Field
+    filterGroupFieldContainer: elementFactory(
+      "div",
+      "FieldContainer",
+      nodes?.filterGroupFieldContainer,
+    ),
+    filterGroupFieldInput: elementFactory(
+      "input",
+      "FieldInput",
+      nodes?.filterGroupFieldInput,
+    ),
+    filterGroupFieldAttributeSelect: elementFactory(
+      "select",
+      "FieldSelect",
+      nodes?.filterGroupFieldAttributeSelect,
+    ),
+    filterGroupFieldAttributeOption: elementFactory(
+      "option",
+      "FieldOption",
+      nodes?.filterGroupFieldAttributeOption,
+    ),
+    filterGroupFieldOperatorSelect: elementFactory(
+      "select",
+      "FieldSelect",
+      nodes?.filterGroupFieldOperatorSelect,
+    ),
+    filterGroupFieldOperatorOption: elementFactory(
+      "option",
+      "FieldOption",
+      nodes?.filterGroupFieldOperatorOption,
+    ),
+    filterGroupFieldRemoveButton: elementFactory(
+      "button",
+      "FieldRemoveButton",
+      nodes?.filterGroupFieldRemoveButton,
+    ),
+  };
 }
 
 const attributeTypes = ["number", "string", "datetime"] as const;
@@ -31,7 +134,7 @@ interface attribute {
 
 interface config {
   rootNode: Node;
-  classes?: classes;
+  nodes?: nodes;
   attributes: attribute[];
 }
 
@@ -49,6 +152,7 @@ class qb {
 
   // elements
   container: Node;
+  nodes: nodes;
 
   constructor(cfg: config) {
     if (!cfg.rootNode) {
@@ -60,6 +164,7 @@ class qb {
     }
 
     this.cfg = cfg;
+    this.nodes = newNodes(cfg.nodes);
     this.container = this.newContainer();
   }
 
@@ -67,18 +172,12 @@ class qb {
     return this.filters;
   }
 
-  private elementID(id: string): string {
-    return `queryBuilder${id}`;
-  }
-
   private error(msg: string) {
     throw new Error(`queryBuilder: ${msg}`);
   }
 
   private newContainer(): Node {
-    const container = document.createElement("div");
-    container.id = this.elementID("Container");
-    container.className = this.cfg.classes?.container || "";
+    const container = this.nodes.container();
     this.cfg.rootNode.appendChild(container);
 
     const filterGroup = this.newFilterGroup(false, container);
@@ -124,58 +223,48 @@ class qb {
   }
 
   private newFilterGroupContainer(): Node {
-    const filterGroup = document.createElement("div");
-    filterGroup.className = this.cfg.classes?.filterGroup || "";
+    const filterGroup = this.nodes.filterGroup();
     return filterGroup;
   }
 
   private newFilterGroupContent(): Node {
-    const filterGroupContent = document.createElement("div");
-    filterGroupContent.className = this.cfg.classes?.filterGroupContent || "";
+    const filterGroupContent = this.nodes.filterGroupContent();
     return filterGroupContent;
   }
 
   private newFilterGroupField(parent: Node): Node {
-    const container = document.createElement("div");
-    container.className = this.cfg.classes?.filterGroupFieldContainer || "";
+    const container = this.nodes.filterGroupFieldContainer();
 
     // attribute select
-    const selectAttribute = document.createElement("select");
-    selectAttribute.className = this.cfg.classes?.filterGroupFieldSelect || "";
+    const selectAttribute = this.nodes.filterGroupFieldAttributeSelect();
     for (const opt of this.cfg.attributes) {
-      const option = document.createElement("option");
-      option.className = this.cfg.classes?.filterGroupFieldOption || "";
+      const option = this.nodes.filterGroupFieldAttributeOption();
       option.value = opt.name;
       option.innerText = opt.name;
       selectAttribute.appendChild(option);
     }
 
     // type select
-    const selectType = document.createElement("select");
-    selectType.className = this.cfg.classes?.filterGroupFieldSelect || "";
+    const selectOperator = this.nodes.filterGroupFieldOperatorSelect();
 
     for (const opt of filterTypes) {
-      const option = document.createElement("option");
-      option.className = this.cfg.classes?.filterGroupFieldOption || "";
+      const option = this.nodes.filterGroupFieldOperatorOption();
       option.value = opt;
       option.innerText = opt;
-      selectType.appendChild(option);
+      selectOperator.appendChild(option);
     }
 
     // input
-    const input = document.createElement("input");
-    input.className = this.cfg.classes?.filterGroupFieldInput || "";
+    const input = this.nodes.filterGroupFieldInput();
 
     // remove
-    const remove = document.createElement("button");
-    remove.className = this.cfg.classes?.filterGroupFieldRemoveButton || "";
-    remove.innerText = "Remove";
+    const remove = this.nodes.filterGroupFieldRemoveButton();
     remove.addEventListener("click", () => {
       parent.removeChild(container);
     });
 
     container.appendChild(selectAttribute);
-    container.appendChild(selectType);
+    container.appendChild(selectOperator);
     container.appendChild(input);
     container.appendChild(remove);
 
@@ -183,41 +272,31 @@ class qb {
   }
 
   private newFilterGroupHeader(): Node {
-    const filterGroupHeader = document.createElement("div");
-    filterGroupHeader.className = this.cfg.classes?.filterGroupHeader || "";
-
+    const filterGroupHeader = this.nodes.filterGroupHeader();
     return filterGroupHeader;
   }
 
   private newFilterGroupHeaderAddField(): Node {
-    const btn = document.createElement("button");
-    btn.className = this.cfg.classes?.filterGroupHeaderAddFieldButton || "";
-    btn.innerText = "add field";
+    const btn = this.nodes.filterGroupHeaderAddFieldButton();
     return btn;
   }
 
   private newFilterGroupHeaderAddGroup(): Node {
-    const btn = document.createElement("button");
-    btn.className = this.cfg.classes?.filterGroupHeaderAddGroupButton || "";
-    btn.innerText = "add group";
+    const btn = this.nodes.filterGroupHeaderAddGroupButton();
     return btn;
   }
 
   private newFilterGroupHeaderRemove(removable: boolean): Node {
-    const btn = document.createElement("button");
-    btn.className = this.cfg.classes?.filterGroupHeaderRemoveButton || "";
+    const btn = this.nodes.filterGroupHeaderRemoveButton();
     btn.disabled = !removable;
-    btn.innerText = "remove";
     return btn;
   }
 
   private newFilterGroupHeaderAndOr(): Node {
-    const andOr = document.createElement("select");
-    andOr.className = this.cfg.classes?.filterGroupHeaderAndOrSelect || "";
+    const andOr = this.nodes.filterGroupHeaderAndOrSelect();
 
     for (const opt of ["and", "or"]) {
-      const option = document.createElement("option");
-      option.className = this.cfg.classes?.filterGroupHeaderAndOrOption || "";
+      const option = this.nodes.filterGroupHeaderAndOrOption();
       option.value = opt;
       option.innerText = opt;
       andOr.appendChild(option);
