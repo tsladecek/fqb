@@ -121,11 +121,24 @@ function newNodes(nodes?: nodes): nodes {
   };
 }
 
-const attributeTypes = ["number", "string", "datetime"] as const;
+const attributeTypes = [
+  "number",
+  "text",
+  "month",
+  "date",
+  "datetime-local",
+  "color",
+  "email",
+  "password",
+  "time",
+  "tel",
+  "url",
+  "week",
+] as const;
 type attributeType = (typeof attributeTypes)[number];
 
-const filterTypes = ["equal", "not equal", "less than", "greater than"];
-type filterType = (typeof filterTypes)[number];
+const filterOperators = ["=", "!=", "<", "<=", ">", ">=", "in", "not in"];
+type filterOperator = (typeof filterOperators)[number];
 
 interface attribute {
   name: string;
@@ -140,7 +153,7 @@ interface config {
 
 interface appliedFilter {
   attribute: attribute;
-  filterType: filterType;
+  filterType: filterOperator;
   value: number | string | boolean;
 
   children: appliedFilter[];
@@ -247,7 +260,7 @@ class qb {
     // type select
     const selectOperator = this.nodes.filterGroupFieldOperatorSelect();
 
-    for (const opt of filterTypes) {
+    for (const opt of filterOperators) {
       const option = this.nodes.filterGroupFieldOperatorOption();
       option.value = opt;
       option.innerText = opt;
@@ -256,6 +269,28 @@ class qb {
 
     // input
     const input = this.nodes.filterGroupFieldInput();
+
+    function setInputFromSelect(cfg: config, attrName: string) {
+      let at = "text";
+
+      const attribute = cfg.attributes.find((a) => a.name === attrName);
+      if (attribute) {
+        if (attributeTypes.includes(attribute.type)) {
+          at = attribute.type;
+        }
+      }
+
+      input.type = at;
+    }
+
+    setInputFromSelect(this.cfg, selectAttribute.value);
+
+    selectAttribute.addEventListener("change", (e) => {
+      if (e?.target) {
+        const t = e.target as HTMLSelectElement;
+        setInputFromSelect(this.cfg, t.value);
+      }
+    });
 
     // remove
     const remove = this.nodes.filterGroupFieldRemoveButton();

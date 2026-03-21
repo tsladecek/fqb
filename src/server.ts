@@ -60,12 +60,12 @@ Deno.serve({ port: 18080 }, async (req) => {
 					const nodes = {
 						container: nodeFactory("div", "w-full", ""),
 
-						filterGroup: nodeFactory("div", "border pl-4 p-1 dashed rounded-md border-dashed flex flex-col gap-2", ""),
+						filterGroup: nodeFactory("div", "border p-1 dashed rounded-md border-dashed flex flex-col gap-2", ""),
 						filterGroupHeader: nodeFactory("div", "flex gap-1", ""),
-						filterGroupContent: nodeFactory("div", "flex flex-col gap-1", ""),
+						filterGroupContent: nodeFactory("div", "flex flex-col gap-1 pl-3", ""),
 
-						filterGroupHeaderAndOrSelect: nodeFactory("select", "w-[70px] text-center border border-gray-300 rounded-md", ""),
-						filterGroupHeaderAndOrOption: nodeFactory("option", "text-center", ""),
+						filterGroupHeaderAndOrSelect: nodeFactory("select", "w-[70px] px-1 border border-gray-300 rounded-md", ""),
+						filterGroupHeaderAndOrOption: nodeFactory("option", "", ""),
 						filterGroupHeaderAddFieldButton: nodeFactory("button", btnClass + "bg-green-700 text-white hover:bg-green-800", "ADD FIELD"),
 						filterGroupHeaderAddGroupButton: nodeFactory("button", btnClass + "bg-blue-700 text-white hover:bg-blue-800", "ADD GROUP"),
 						filterGroupHeaderRemoveButton: nodeFactory("button", btnClass + "bg-red-800 text-white hover:bg-red-900", "REMOVE"),
@@ -83,7 +83,7 @@ Deno.serve({ port: 18080 }, async (req) => {
 						nodes: nodes,
 						attributes: [
 							{name: "first", type: "number"},
-							{"name": "second", type: "string"}
+							{name: "second", type: "string"}
 						]
 					}
 					const qb = queryBuilder(cfg)
