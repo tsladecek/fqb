@@ -126,7 +126,16 @@ const attributeTypes = [
 ] as const;
 export type AttributeType = (typeof attributeTypes)[number];
 
-const filterOperators = ["=", "!=", "<", "<=", ">", ">=", "in", "not in"];
+const filterOperators = [
+  "=",
+  "!=",
+  "<",
+  "<=",
+  ">",
+  ">=",
+  "contains",
+  "not contains",
+];
 export type FilterOperator = (typeof filterOperators)[number];
 
 const conditions = ["and", "or"];
@@ -153,7 +162,7 @@ export interface AppliedFilter {
   children?: AppliedFilter[];
 }
 
-class QueryBuilder {
+export class QueryBuilder {
   private cfg: Config;
   private nodes: Nodes;
 
@@ -366,10 +375,7 @@ class QueryBuilder {
     const container = this.nodes.container();
     this.cfg.rootNode.appendChild(container);
 
-    const rootFilterGroup = this.newFilterGroup(false, container);
-    container.appendChild(rootFilterGroup);
-
-    return rootFilterGroup;
+    return this.newFilterGroup(false, container);
   }
 
   newFilterGroup(removable: boolean, parent: ElementDiv): ElementDiv {
@@ -392,8 +398,7 @@ class QueryBuilder {
     filterGroupHeader.appendChild(remove);
 
     addField.addEventListener("click", () => {
-      const fgf = this.newFilterGroupField(filterGroupContent);
-      filterGroupContent.appendChild(fgf);
+      this.newFilterGroupField(filterGroupContent);
     });
 
     remove.addEventListener("click", () => {
@@ -401,10 +406,10 @@ class QueryBuilder {
     });
 
     addGroup.addEventListener("click", () => {
-      const g = this.newFilterGroup(true, filterGroupContent);
-      filterGroupContent.appendChild(g);
+      this.newFilterGroup(true, filterGroupContent);
     });
 
+    parent.appendChild(filterGroupContainer);
     return filterGroupContainer;
   }
 
@@ -476,6 +481,7 @@ class QueryBuilder {
     container.appendChild(input);
     container.appendChild(remove);
 
+    parent.appendChild(container);
     return container;
   }
 

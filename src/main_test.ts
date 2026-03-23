@@ -20,6 +20,7 @@ import {
   ElementTagNameMap,
   ClassList,
   Event,
+  QueryBuilder,
 } from "./main.ts";
 
 class MockClassList {
@@ -83,12 +84,22 @@ class MockDOM {
   }
 }
 
-function setField(
-  container: ElementDiv,
+function addField(
+  qb: QueryBuilder,
+  filterGroup: ElementDiv,
   attr: string,
   operator: FilterOperator,
   value: string,
 ) {
+  const fgc = getChildByClass(filterGroup, ClassFilterGroupContent);
+  if (!fgc) {
+    throw new Error("no fgc");
+  }
+  const container = qb.newFilterGroupField(fgc);
+  if (!container) {
+    throw new Error("no container");
+  }
+
   const att = getChildByClass(
     container,
     ClassFilterGroupContentFieldAttributeSelect,
@@ -144,16 +155,38 @@ Deno.test("happy path", () => {
   } as Config;
 
   const qb = queryBuilder(cfg, document);
-  setCondition(qb.rootFilterGroup, "and");
-  const fgc = getChildByClass(qb.rootFilterGroup, ClassFilterGroupContent);
-  const f1 = qb.newFilterGroupField(qb.rootFilterGroup);
-  fgc?.appendChild(f1);
 
-  setField(f1, attributes[0].name, "=", "123");
+  // root filter group
+  setCondition(qb.rootFilterGroup, "and");
+  addField(qb, qb.rootFilterGroup, attributes[0].name, "=", "123");
+  addField(qb, qb.rootFilterGroup, attributes[1].name, "contains", "aaa");
+
+  const rootContent = getChildByClass(
+    qb.rootFilterGroup,
+    ClassFilterGroupContent,
+  );
+  if (!rootContent) {
+    throw new Error("no root content");
+  }
+
+  // another group
+  const fg = qb.newFilterGroup(true, rootContent);
+  setCondition(fg, "or");
+  addField(qb, fg, attributes[2].name, "<", "654");
+
   const applied = qb.getFilters();
 
   assertEquals(applied, {
     condition: "and",
-    children: [{ attribute: attributes[0].name, operator: "=", value: "123" }],
+    children: [
+      { attribute: attributes[0].name, operator: "=", value: "123" },
+      { attribute: attributes[1].name, operator: "contains", value: "aaa" },
+      {
+        condition: "or",
+        children: [
+          { attribute: attributes[2].name, operator: "<", value: "654" },
+        ],
+      },
+    ],
   } as AppliedFilter);
 });
