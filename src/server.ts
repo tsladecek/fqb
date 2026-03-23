@@ -60,30 +60,32 @@ Deno.serve({ port: 18080 }, async (req) => {
 					const nodes = {
 						container: nodeFactory("div", "w-full", ""),
 
-						filterGroup: nodeFactory("div", "border p-1 dashed rounded-md border-dashed flex flex-col gap-2", ""),
+						filterGroup: nodeFactory("div", "border border-gray-300 p-1 dashed rounded-md border-dashed flex flex-col gap-2", ""),
 						filterGroupHeader: nodeFactory("div", "flex gap-1", ""),
 						filterGroupContent: nodeFactory("div", "flex flex-col gap-1 pl-3", ""),
 
-						filterGroupHeaderConditionSelect: nodeFactory("select", "w-[70px] px-1 border border-gray-300 rounded-md", ""),
+						filterGroupHeaderConditionSelect: nodeFactory("select", "px-1 border border-gray-300 rounded-md", ""),
 						filterGroupHeaderConditionOption: nodeFactory("option", "", ""),
 						filterGroupHeaderAddFieldButton: nodeFactory("button", btnClass + "bg-green-700 text-white hover:bg-green-800", "ADD FIELD"),
 						filterGroupHeaderAddGroupButton: nodeFactory("button", btnClass + "bg-blue-700 text-white hover:bg-blue-800", "ADD GROUP"),
 						filterGroupHeaderRemoveButton: nodeFactory("button", btnClass + "bg-red-800 text-white hover:bg-red-900", "REMOVE"),
 
-						filterGroupFieldContainer: nodeFactory("div", "flex gap-1", ""),
-						filterGroupFieldInput: nodeFactory("input", "w-[100px] border border-gray-300 px-1 rounded-md", ""),
-						filterGroupFieldAttributeSelect: nodeFactory("select", "w-[100px] border border-gray-300 px-1 rounded-md", ""),
-						filterGroupFieldAttributeOption: nodeFactory("option", "w-[100px] border border-gray-300 px-1 rounded-md", ""),
-						filterGroupFieldOperatorSelect: nodeFactory("select", "w-[100px] border border-gray-300 px-1 rounded-md", ""),
-						filterGroupFieldOperatorOption: nodeFactory("option", "w-[100px] border border-gray-300 px-1 rounded-md", ""),
-						filterGroupFieldRemoveButton: nodeFactory("button", btnClass + "bg-red-800 text-white hover:bg-red-900", "REMOVE"),
+						filterGroupContentFieldContainer: nodeFactory("div", "flex gap-1 grid grid-cols-4", ""),
+						filterGroupContentFieldInput: nodeFactory("input", "border border-gray-300 px-1 rounded-md", ""),
+						filterGroupContentFieldAttributeSelect: nodeFactory("select", "border border-gray-300 px-1 rounded-md", ""),
+						filterGroupContentFieldAttributeOption: nodeFactory("option", "border border-gray-300 px-1 rounded-md", ""),
+						filterGroupContentFieldOperatorSelect: nodeFactory("select", "border border-gray-300 px-1 rounded-md", ""),
+						filterGroupContentFieldOperatorOption: nodeFactory("option", "border border-gray-300 px-1 rounded-md", ""),
+						filterGroupContentFieldRemoveButton: nodeFactory("button", btnClass + "bg-red-800 text-white hover:bg-red-900", "REMOVE"),
 					}
 					const cfg = {
 						rootNode: filterContainer,
 						nodes: nodes,
 						attributes: [
-							{name: "first", type: "number"},
-							{name: "second", type: "string"}
+							{name: "number field", type: "number"},
+							{name: "text field", type: "string"},
+							{name: "password field", type: "password"},
+							{name: "date field", type: "date"},
 						]
 					}
 					const qb = queryBuilder(cfg)
