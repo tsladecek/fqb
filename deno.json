@@ -3,7 +3,6 @@
     "dev": "deno run --watch src/main.ts",
     "build": "deno bundle src/main.ts --watch -o dist/query-builder.min.js",
     "build_minify": "deno bundle src/main.ts -o dist/query-builder.min.js --minify",
-    "test": "deno test --allow-none"
     "server": "deno run --watch --allow-net --allow-read src/server.ts"
     "tw": "tailwindcss -w -i ./dist/input.css -o ./dist/output.css"
   },
