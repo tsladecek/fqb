@@ -1,13 +1,30 @@
-interface ElementBase {
-  classList: DOMTokenList;
-  appendChild(node: any): any;
-  removeChild(node: any): any;
-  addEventListener(type: string, listener: (e?: any) => void): void;
+interface DOM {
+  createElement<K extends keyof ElementTagNameMap>(s: K): ElementTagNameMap[K];
 }
 
-export interface ElementDiv extends ElementBase {
-  children: any;
+export interface EventTarget {
+  value: string;
 }
+
+export interface Event {
+  target: EventTarget;
+}
+
+export interface ClassList {
+  add(cls: string): undefined;
+  remove(cls: string): undefined;
+  contains(cls: string): boolean;
+}
+
+export interface ElementBase {
+  classList: ClassList;
+  appendChild(node: ElementBase): ElementBase;
+  removeChild(node: ElementBase): ElementBase;
+  addEventListener(type: string, listener: (e?: Event) => void): void;
+  children: ElementBase[];
+}
+
+export interface ElementDiv extends ElementBase {}
 
 export function getChildByClass(
   parent: ElementDiv,
@@ -37,6 +54,14 @@ export interface ElementOption extends ElementBase {
 
 export interface ElementButton extends ElementBase {
   disabled: boolean;
+}
+
+export interface ElementTagNameMap {
+  div: ElementDiv;
+  input: ElementInput;
+  select: ElementSelect;
+  option: ElementOption;
+  button: ElementButton;
 }
 
 export interface Nodes {
@@ -133,9 +158,9 @@ class QueryBuilder {
   private nodes: Nodes;
 
   rootFilterGroup: ElementDiv;
-  dom: any;
+  dom: DOM;
 
-  constructor(cfg: Config, dom?: any) {
+  constructor(cfg: Config, dom?: DOM) {
     if (!cfg.rootNode) {
       this.error("root node not provided, or does not exist");
     }
@@ -158,13 +183,13 @@ class QueryBuilder {
     return this.filterGroupAppliedFilter(this.rootFilterGroup);
   }
 
-  private elementFactory<K extends keyof HTMLElementTagNameMap>(
+  private elementFactory<K extends keyof ElementTagNameMap>(
     type: K,
     className: string,
-    provided?: () => ElementBase,
-  ): () => HTMLElementTagNameMap[K] {
+    provided?: () => ElementTagNameMap[K],
+  ): () => ElementTagNameMap[K] {
     return () => {
-      let element = this.dom.createElement(type);
+      let element: ElementTagNameMap[K] = this.dom.createElement(type);
       if (provided) {
         element = provided();
       }
@@ -329,7 +354,7 @@ class QueryBuilder {
     return {
       attribute: (attribute as ElementSelect).value,
       operator: (operator as ElementSelect).value,
-      value: (input as HTMLInputElement).value,
+      value: (input as ElementInput).value,
     };
   }
 
@@ -489,7 +514,7 @@ class QueryBuilder {
   }
 }
 
-export function queryBuilder(cfg: Config, dom?: any): QueryBuilder {
+export function queryBuilder(cfg: Config, dom?: DOM): QueryBuilder {
   const q = new QueryBuilder(cfg, dom);
   return q;
 }

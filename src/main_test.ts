@@ -17,21 +17,24 @@ import {
   ElementOption,
   ElementSelect,
   getChildByClass,
+  ElementTagNameMap,
+  ClassList,
+  Event,
 } from "./main.ts";
 
 class MockClassList {
-  classes: any[] = [];
+  classes: string[] = [];
 
-  add(cls: string) {
+  add(cls: string): undefined {
     this.classes.push(cls);
   }
-  remove(cls: string) {
+  remove(cls: string): undefined {
     const index = this.classes.indexOf(cls);
     if (index > -1) {
       this.classes.splice(index, 1);
     }
   }
-  contains(cls: string) {
+  contains(cls: string): boolean {
     return this.classes.includes(cls);
   }
 }
@@ -44,11 +47,10 @@ class MockElement
     ElementOption,
     ElementButton
 {
-  classList: any = new MockClassList();
+  classList: ClassList = new MockClassList();
   children: MockElement[] = [];
-  listeners: Record<string, ((e?: any) => void)[]> = {};
+  listeners: Record<string, ((e?: Event) => void)[]> = {};
 
-  // Specific properties
   value: string = "";
   type: string = "text";
   innerText: string = "";
@@ -64,12 +66,11 @@ class MockElement
     return node;
   }
 
-  addEventListener(type: string, listener: (e?: any) => void) {
+  addEventListener(type: string, listener: (e?: Event) => void) {
     if (!this.listeners[type]) this.listeners[type] = [];
     this.listeners[type].push(listener);
   }
 
-  // Helper to trigger events in tests
   dispatchEvent(event: { type: string }) {
     const handlers = this.listeners[event.type] || [];
     handlers.forEach((handler) => handler({ target: this }));
@@ -77,7 +78,7 @@ class MockElement
 }
 
 class MockDOM {
-  createElement(et: string): ElementDiv {
+  createElement<K extends keyof ElementTagNameMap>(_: K): ElementTagNameMap[K] {
     return new MockElement();
   }
 }
