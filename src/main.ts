@@ -162,7 +162,7 @@ export interface AppliedFilter {
   children?: AppliedFilter[];
 }
 
-export class QueryBuilder {
+export class FQB {
   private cfg: Config;
   private nodes: Nodes;
 
@@ -518,9 +518,4 @@ export class QueryBuilder {
 
     return andOr;
   }
-}
-
-export function queryBuilder(cfg: Config, dom?: DOM): QueryBuilder {
-  const q = new QueryBuilder(cfg, dom);
-  return q;
 }

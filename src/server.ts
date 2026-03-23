@@ -1,9 +1,9 @@
 Deno.serve({ port: 18080 }, async (req) => {
   const url = new URL(req.url);
 
-  if (url.pathname === "/static/query-builder.min.js") {
+  if (url.pathname === "/static/fqb.min.js") {
     try {
-      const file = await Deno.readFile("./dist/query-builder.min.js");
+      const file = await Deno.readFile("./dist/fqb.min.js");
       return new Response(file, {
         headers: {
           "content-type": "application/javascript",
@@ -17,7 +17,7 @@ Deno.serve({ port: 18080 }, async (req) => {
 
   if (url.pathname === "/static/output.css") {
     try {
-      const file = await Deno.readFile("./dist/output.css");
+      const file = await Deno.readFile("./docs/static/output.css");
       return new Response(file, {
         headers: {
           "Cache-Control": "no-store",
@@ -42,7 +42,7 @@ Deno.serve({ port: 18080 }, async (req) => {
 				<button id="evaluate" type="button" class="bg-gray-200 rounded-md hover:cursor-pointer">Evaluate</button>
 				<div id="queryResult"></div>
 				<script type="module">
-					import { queryBuilder } from "/static/query-builder.min.js";
+					import { FQB } from "/static/fqb.min.js";
 
 					function nodeFactory(elementType, className, innerText) {
 						return () => {
@@ -88,7 +88,7 @@ Deno.serve({ port: 18080 }, async (req) => {
 							{name: "date field", type: "date"},
 						]
 					}
-					const qb = queryBuilder(cfg)
+					const qb = new FQB(cfg)
 					evaluate.addEventListener("click", () => {
 							const filters = qb.getFilters();
 							const jsonString = JSON.stringify(filters, null, 2);

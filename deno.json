@@ -1,10 +1,9 @@
 {
   "tasks": {
-    "dev": "deno run --watch src/main.ts",
-    "build": "deno bundle src/main.ts --watch -o dist/query-builder.min.js",
-    "build_minify": "deno bundle src/main.ts -o dist/query-builder.min.js --minify",
+    "dev": "deno bundle src/main.ts --watch -o dist/fqb.min.js",
+    "build": "deno bundle src/main.ts -o dist/fqb.min.js --minify",
     "server": "deno run --watch --allow-net --allow-read src/server.ts"
-    "tw": "tailwindcss -w -i ./dist/input.css -o ./dist/output.css"
+    "tw": "tailwindcss -w -i ./docs/static/input.css -o ./docs/static/output.css"
   },
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "dom.asynciterable", "deno.ns"]

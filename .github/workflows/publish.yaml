@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build_and_upload:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Run Build
+        run: mkdir -p dist && deno run build
+
+      - name: Rename file with version
+        run: mv dist/fqb.min.js dist/fqb-${{ github.ref_name }}.min.js
+
+      - name: Upload Binary to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/fqb-${{ github.ref_name }}.min.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,6 +1,5 @@
 import { assertEquals } from "@std/assert";
 import {
-  queryBuilder,
   Config,
   Attribute,
   FilterOperator,
@@ -20,7 +19,7 @@ import {
   ElementTagNameMap,
   ClassList,
   Event,
-  QueryBuilder,
+  FQB,
 } from "./main.ts";
 
 class MockClassList {
@@ -85,7 +84,7 @@ class MockDOM {
 }
 
 function addField(
-  qb: QueryBuilder,
+  qb: FQB,
   filterGroup: ElementDiv,
   attr: string,
   operator: FilterOperator,
@@ -154,7 +153,7 @@ Deno.test("happy path", () => {
     attributes: attributes,
   } as Config;
 
-  const qb = queryBuilder(cfg, document);
+  const qb = new FQB(cfg, document);
 
   // root filter group
   setCondition(qb.rootFilterGroup, "and");
