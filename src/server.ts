@@ -64,8 +64,8 @@ Deno.serve({ port: 18080 }, async (req) => {
 						filterGroupHeader: nodeFactory("div", "flex gap-1", ""),
 						filterGroupContent: nodeFactory("div", "flex flex-col gap-1 pl-3", ""),
 
-						filterGroupHeaderAndOrSelect: nodeFactory("select", "w-[70px] px-1 border border-gray-300 rounded-md", ""),
-						filterGroupHeaderAndOrOption: nodeFactory("option", "", ""),
+						filterGroupHeaderConditionSelect: nodeFactory("select", "w-[70px] px-1 border border-gray-300 rounded-md", ""),
+						filterGroupHeaderConditionOption: nodeFactory("option", "", ""),
 						filterGroupHeaderAddFieldButton: nodeFactory("button", btnClass + "bg-green-700 text-white hover:bg-green-800", "ADD FIELD"),
 						filterGroupHeaderAddGroupButton: nodeFactory("button", btnClass + "bg-blue-700 text-white hover:bg-blue-800", "ADD GROUP"),
 						filterGroupHeaderRemoveButton: nodeFactory("button", btnClass + "bg-red-800 text-white hover:bg-red-900", "REMOVE"),
@@ -87,10 +87,13 @@ Deno.serve({ port: 18080 }, async (req) => {
 						]
 					}
 					const qb = queryBuilder(cfg)
-					console.log(evaluate)
 					evaluate.addEventListener("click", () => {
-						queryResult.innerText = JSON.stringify(qb.getFilters())
-					})
+							const filters = qb.getFilters();
+							const jsonString = JSON.stringify(filters, null, 2);
+							const pre = document.createElement("pre");
+							pre.textContent = jsonString;
+							queryResult.replaceChildren(pre); 
+					});
 				</script>
 			</body>
 		</html>`,
