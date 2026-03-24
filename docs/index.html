@@ -3,54 +3,193 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FQB - Filter Query Builder</title>
     <link rel="stylesheet" href="./static/output.css" />
   </head>
-  <body class="p-1">
-    <section>
-      <h1 class="text-xl font-semibold">FQB - Filter Query Builder</h1>
-      <p>
-        Filter query builder is a minimal package similar to jquery Query
-        Builder. It contains no dependencies, is written in TypeScript and can
-        be used as module.
-      </p>
-      <p>
-        By design, the package does not use its own components (HTMLElements),
-        you have to bring your own. See the examples below for more info.
-      </p>
-    </section>
+  <body class="bg-gray-50 text-gray-900 font-sans antialiased min-h-screen">
+    <div class="max-w-4xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+      <header class="text-center mb-16">
+        <h1
+          class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl mb-4"
+        >
+          FQB - Filter Query Builder
+        </h1>
+        <div class="max-w-2xl mx-auto space-y-4">
+          <p class="text-xl text-gray-600">
+            A minimal, dependency-free TypeScript package for building complex
+            filter queries.
+          </p>
+          <p class="text-gray-500">
+            Designed to be lightweight and flexible, FQB provides the core logic
+            while letting you bring your own components and styling.
+          </p>
+          <p>
+            The source code is available on
+            <a
+              href="https://github.com/tsladecek/fqb"
+              target="_blank"
+              class="underline hover:bg-gray-100"
+              >Github</a
+            >
+          </p>
+        </div>
+      </header>
 
-    <section>
-      <h2 class="text-lg font-semibold">Default - unstyled</h2>
-      <div id="unstyled"></div>
-      <button
-        id="evaluateDefault"
-        type="button"
-        class="bg-gray-200 rounded-md hover:cursor-pointer"
-      >
-        Evaluate
-      </button>
-      <div id="defaultQueryResult" class="bg-gray-100"></div>
-      <details class="border border-gray-500 open:bg-gray-100 rounded-md p-1">
-        <summary>Code</summary>
-        <pre id="defaultDetails"></pre>
-      </details>
-    </section>
-    <section>
-      <h2 class="text-lg font-semibold">Styled with Tailwind</h2>
-      <div id="tailwindStyled"></div>
-      <button
-        id="evaluateTailwind"
-        type="button"
-        class="bg-gray-200 rounded-md hover:cursor-pointer"
-      >
-        Evaluate
-      </button>
-      <div id="tailwindQueryResult" class="bg-gray-100"></div>
-      <details class="border border-gray-500 open:bg-gray-100 rounded-md p-1">
-        <summary>Code</summary>
-        <pre id="twDetails"></pre>
-      </details>
-    </section>
+      <main class="space-y-12">
+        <!-- Unstyled Section -->
+        <section
+          class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+        >
+          <div class="p-8">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold text-gray-900">
+                Default - Unstyled
+              </h2>
+              <span
+                class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full uppercase tracking-wider"
+                >Minimal</span
+              >
+            </div>
+
+            <div
+              id="unstyled"
+              class="mb-6 p-4 border border-dashed border-gray-300 rounded-lg min-h-[100px] bg-gray-50/50"
+            ></div>
+
+            <div class="flex flex-col space-y-4">
+              <button
+                id="evaluateDefault"
+                type="button"
+                class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-sm cursor-pointer"
+              >
+                Evaluate Query
+              </button>
+
+              <div class="space-y-2">
+                <span
+                  class="text-xs font-bold text-gray-400 uppercase tracking-widest"
+                  >Resulting JSON</span
+                >
+                <div
+                  id="defaultQueryResult"
+                  class="p-4 bg-gray-900 text-indigo-300 rounded-xl font-mono text-sm overflow-x-auto min-h-[60px] shadow-inner"
+                ></div>
+              </div>
+
+              <details
+                class="group border border-gray-200 rounded-xl overflow-hidden transition-all"
+              >
+                <summary
+                  class="flex items-center justify-between px-4 py-3 cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors list-none"
+                >
+                  <span class="text-sm font-semibold text-gray-700"
+                    >Implementation Code</span
+                  >
+                  <svg
+                    class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    ></path>
+                  </svg>
+                </summary>
+                <div class="p-0 border-t border-gray-200">
+                  <pre
+                    id="defaultDetails"
+                    class="p-4 text-sm font-mono text-gray-300 bg-gray-800 overflow-x-auto"
+                  ></pre>
+                </div>
+              </details>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tailwind Styled Section -->
+        <section
+          class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+        >
+          <div class="p-8">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold text-gray-900">
+                Styled with Tailwind
+              </h2>
+              <span
+                class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-full uppercase tracking-wider"
+                >Custom UI</span
+              >
+            </div>
+
+            <div id="tailwindStyled" class="mb-6"></div>
+
+            <div class="flex flex-col space-y-4">
+              <button
+                id="evaluateTailwind"
+                type="button"
+                class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-sm cursor-pointer"
+              >
+                Evaluate Query
+              </button>
+
+              <div class="space-y-2">
+                <span
+                  class="text-xs font-bold text-gray-400 uppercase tracking-widest"
+                  >Resulting JSON</span
+                >
+                <div
+                  id="tailwindQueryResult"
+                  class="p-4 bg-gray-900 text-emerald-400 rounded-xl font-mono text-sm overflow-x-auto min-h-[60px] shadow-inner"
+                ></div>
+              </div>
+
+              <details
+                class="group border border-gray-200 rounded-xl overflow-hidden transition-all"
+              >
+                <summary
+                  class="flex items-center justify-between px-4 py-3 cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors list-none"
+                >
+                  <span class="text-sm font-semibold text-gray-700"
+                    >Implementation Code</span
+                  >
+                  <svg
+                    class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    ></path>
+                  </svg>
+                </summary>
+                <div class="p-0 border-t border-gray-200">
+                  <pre
+                    id="twDetails"
+                    class="p-4 text-sm font-mono text-gray-300 bg-gray-800 overflow-x-auto"
+                  ></pre>
+                </div>
+              </details>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="mt-20 text-center text-gray-400 text-sm">
+        <p>
+          &copy; 2026 FQB - Filter Query Builder. Released under the MIT
+          License.
+        </p>
+      </footer>
+    </div>
+
     <script type="module" src="./static/withTw.js"></script>
     <script type="module" src="./static/unstyled.js"></script>
     <script>
