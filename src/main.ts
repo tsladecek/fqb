@@ -22,6 +22,8 @@ export interface ElementBase {
   removeChild(node: ElementBase): ElementBase;
   addEventListener(type: string, listener: (e?: Event) => void): void;
   children: ElementBase[];
+  innerHTML: string;
+  innerText: string;
 }
 
 export interface ElementDiv extends ElementBase {}
@@ -49,7 +51,6 @@ export interface ElementSelect extends ElementBase {
 
 export interface ElementOption extends ElementBase {
   value: string;
-  innerText: string;
 }
 
 export interface ElementButton extends ElementBase {
@@ -137,6 +138,31 @@ const filterOperators = [
   "not contains",
 ];
 export type FilterOperator = (typeof filterOperators)[number];
+
+const numericOperators: FilterOperator[] = ["=", "!=", "<", "<=", ">", ">="];
+const textOperators: FilterOperator[] = ["=", "!=", "contains", "not contains"];
+
+export const attributeTypeOperators: Record<AttributeType, FilterOperator[]> = {
+  // Numeric & Range-based
+  number: numericOperators,
+
+  // Textual (Exact match + Partial match)
+  text: textOperators,
+  email: textOperators,
+  url: textOperators,
+  tel: textOperators,
+  password: ["=", "!="], // Usually don't want "contains" for security
+
+  // Temporal (Date/Time)
+  date: numericOperators,
+  month: numericOperators,
+  week: numericOperators,
+  time: numericOperators,
+  "datetime-local": ["=", "!=", "<", "<=", ">", ">="],
+
+  // Categorical / Special
+  color: ["=", "!="],
+};
 
 const conditions = ["and", "or"];
 export type Condition = (typeof conditions)[number];
@@ -437,36 +463,22 @@ export class FQB {
 
     // type select
     const selectOperator = this.nodes.filterGroupContentFieldOperatorSelect();
-
-    for (const opt of filterOperators) {
-      const option = this.nodes.filterGroupContentFieldOperatorOption();
-      option.value = opt;
-      option.innerText = opt;
-      selectOperator.appendChild(option);
-    }
+    // operator options are set in the setInputAndOperatorsForAttribute function
+    // based on the type of the selected attribute
 
     // input
     const input = this.nodes.filterGroupContentFieldInput();
 
-    function setInputFromSelect(cfg: Config, attrName: string) {
-      let at = "text";
-
-      const attribute = cfg.attributes.find((a) => a.name === attrName);
-      if (attribute) {
-        if (attributeTypes.includes(attribute.type)) {
-          at = attribute.type;
-        }
-      }
-
-      input.type = at;
-    }
-
-    setInputFromSelect(this.cfg, selectAttribute.value);
+    this.setInputAndOperatorsForAttribute(
+      selectAttribute.value,
+      input,
+      selectOperator,
+    );
 
     selectAttribute.addEventListener("change", (e) => {
       if (e?.target) {
         const t = e.target as ElementSelect;
-        setInputFromSelect(this.cfg, t.value);
+        this.setInputAndOperatorsForAttribute(t.value, input, selectOperator);
       }
     });
 
@@ -517,5 +529,34 @@ export class FQB {
     }
 
     return andOr;
+  }
+
+  private setInputAndOperatorsForAttribute(
+    attrName: string,
+    input: ElementInput,
+    select: ElementSelect,
+  ) {
+    let attributeType: AttributeType = "text";
+
+    const attribute = this.cfg.attributes.find((a) => a.name === attrName);
+    if (attribute) {
+      if (attributeTypes.includes(attribute.type)) {
+        attributeType = attribute.type;
+      }
+    }
+
+    input.type = attributeType;
+    select.innerHTML = "";
+
+    let ops = filterOperators;
+    if (Object.hasOwn(attributeTypeOperators, attributeType)) {
+      ops = attributeTypeOperators[attributeType];
+    }
+    for (const opt of ops) {
+      const option = this.nodes.filterGroupContentFieldOperatorOption();
+      option.value = opt;
+      option.innerText = opt;
+      select.appendChild(option);
+    }
   }
 }

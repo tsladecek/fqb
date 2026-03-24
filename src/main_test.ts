@@ -54,6 +54,7 @@ class MockElement
   value: string = "";
   type: string = "text";
   innerText: string = "";
+  innerHTML: string = "";
   disabled: boolean = false;
 
   appendChild(node: MockElement) {
