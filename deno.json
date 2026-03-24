@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "dev": "deno bundle src/main.ts --watch -o dist/fqb.min.js",
+    "dev": "deno bundle src/main.ts --watch -o docs/static/fqb.min.js",
     "build": "deno bundle src/main.ts -o dist/fqb.min.js --minify",
     "server": "deno run --watch --allow-net --allow-read src/server.ts"
     "tw": "tailwindcss -w -i ./docs/static/input.css -o ./docs/static/output.css"
