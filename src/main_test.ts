@@ -2,7 +2,6 @@ import { assertEquals } from "@std/assert";
 import {
   Config,
   Attribute,
-  FilterOperator,
   AppliedFilter,
   ClassFilterGroupContentFieldAttributeSelect,
   ClassFilterGroupContentFieldOperatorSelect,
@@ -88,7 +87,7 @@ function addField(
   qb: FQB,
   filterGroup: ElementDiv,
   attr: string,
-  operator: FilterOperator,
+  operator: string,
   value: string,
 ) {
   const fgc = getChildByClass(filterGroup, ClassFilterGroupContent);

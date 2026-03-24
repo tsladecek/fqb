@@ -111,7 +111,7 @@ export const ClassFilterGroupContentFieldOperatorSelect = `${classPrefix}FilterG
 export const ClassFilterGroupContentFieldOperatorOption = `${classPrefix}FilterGroupContentFieldOperatorOption`;
 export const ClassFilterGroupContentFieldRemoveButton = `${classPrefix}FilterGroupContentFieldRemoveButton`;
 
-const attributeTypes = [
+const defaultAttributeTypes: string[] = [
   "number",
   "text",
   "month",
@@ -125,9 +125,8 @@ const attributeTypes = [
   "url",
   "week",
 ] as const;
-export type AttributeType = (typeof attributeTypes)[number];
 
-const filterOperators = [
+const defaultFilterOperators: string[] = [
   "=",
   "!=",
   "<",
@@ -136,51 +135,62 @@ const filterOperators = [
   ">=",
   "contains",
   "not contains",
-];
-export type FilterOperator = (typeof filterOperators)[number];
+] as const;
 
-const numericOperators: FilterOperator[] = ["=", "!=", "<", "<=", ">", ">="];
-const textOperators: FilterOperator[] = ["=", "!=", "contains", "not contains"];
+const numericOperators: string[] = ["=", "!=", "<", "<=", ">", ">="];
+const textOperators: string[] = ["=", "!=", "contains", "not contains"];
 
-export const attributeTypeOperators: Record<AttributeType, FilterOperator[]> = {
-  // Numeric & Range-based
-  number: numericOperators,
-
-  // Textual (Exact match + Partial match)
-  text: textOperators,
-  email: textOperators,
-  url: textOperators,
-  tel: textOperators,
-  password: ["=", "!="], // Usually don't want "contains" for security
-
-  // Temporal (Date/Time)
-  date: numericOperators,
-  month: numericOperators,
-  week: numericOperators,
-  time: numericOperators,
-  "datetime-local": ["=", "!=", "<", "<=", ">", ">="],
-
-  // Categorical / Special
-  color: ["=", "!="],
-};
-
-const conditions = ["and", "or"];
+const conditions = ["and", "or"] as const;
 export type Condition = (typeof conditions)[number];
 
 export interface Attribute {
   name: string;
-  type: AttributeType;
+  type: string;
 }
+
+export interface AttributeTypeSpec {
+  attributeType: string;
+  operators: string[];
+  inputType: string;
+}
+
+export const defaultAttributeTypeSpec: AttributeTypeSpec[] = [
+  // Numeric & Range-based
+  { attributeType: "number", operators: numericOperators, inputType: "text" },
+
+  //  // Textual (Exact match + Partial match)
+  { attributeType: "text", operators: textOperators, inputType: "text" },
+  { attributeType: "email", operators: textOperators, inputType: "text" },
+  { attributeType: "url", operators: textOperators, inputType: "text" },
+  { attributeType: "tel", operators: textOperators, inputType: "text" },
+  { attributeType: "password", operators: ["=", "!="], inputType: "text" },
+
+  // Temporal (Date/Time)
+  { attributeType: "date", operators: numericOperators, inputType: "text" },
+  { attributeType: "month", operators: numericOperators, inputType: "text" },
+  { attributeType: "week", operators: numericOperators, inputType: "text" },
+  { attributeType: "time", operators: numericOperators, inputType: "text" },
+  {
+    attributeType: "datetime-local",
+    operators: ["=", "!=", "<", "<=", ">", ">="],
+    inputType: "text",
+  },
+
+  // Categorical / Special
+  { attributeType: "color", operators: ["=", "!="], inputType: "text" },
+];
 
 export interface Config {
   rootNode: ElementDiv;
-  nodes?: Nodes;
   attributes: Attribute[];
+
+  nodes?: Nodes;
+  attributeTypeSpec?: AttributeTypeSpec[];
 }
 
 export interface AppliedFilter {
   attribute: string;
-  operator: FilterOperator;
+  operator: string;
   value: number | string | boolean;
 
   // relevant for filterGroup
@@ -192,6 +202,7 @@ export class FQB {
   private cfg: Config;
   private nodes: Nodes;
 
+  attributeTypeSpec: AttributeTypeSpec[];
   rootFilterGroup: ElementDiv;
   dom: DOM;
 
@@ -210,6 +221,13 @@ export class FQB {
     } else {
       this.dom = document;
     }
+
+    if (cfg.attributeTypeSpec) {
+      this.attributeTypeSpec = cfg.attributeTypeSpec;
+    } else {
+      this.attributeTypeSpec = defaultAttributeTypeSpec;
+    }
+
     this.nodes = this.newNodes();
     this.rootFilterGroup = this.newRootFilterGroup();
   }
@@ -536,22 +554,30 @@ export class FQB {
     input: ElementInput,
     select: ElementSelect,
   ) {
-    let attributeType: AttributeType = "text";
+    let attributeType = "text";
 
     const attribute = this.cfg.attributes.find((a) => a.name === attrName);
     if (attribute) {
-      if (attributeTypes.includes(attribute.type)) {
+      if (defaultAttributeTypes.includes(attribute.type)) {
         attributeType = attribute.type;
       }
     }
 
-    input.type = attributeType;
+    let ops = defaultFilterOperators;
+    let inputType = "text";
+
+    const f = this.attributeTypeSpec.find(
+      (a) => a.attributeType == attributeType,
+    );
+
+    if (f) {
+      ops = f.operators;
+      inputType = f.inputType;
+    }
+
+    input.type = inputType;
     select.innerHTML = "";
 
-    let ops = filterOperators;
-    if (Object.hasOwn(attributeTypeOperators, attributeType)) {
-      ops = attributeTypeOperators[attributeType];
-    }
     for (const opt of ops) {
       const option = this.nodes.filterGroupContentFieldOperatorOption();
       option.value = opt;

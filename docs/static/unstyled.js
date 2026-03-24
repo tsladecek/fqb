@@ -26,6 +26,18 @@ const cfg = {
     { name: "password field", type: "password" },
     { name: "date field", type: "date" },
   ],
+  attributeTypeSpec: [
+    {
+      attributeType: "number",
+      operators: ["=", "<", ">"],
+      inputType: "number",
+    },
+    {
+      attributeType: "text",
+      operators: ["contains", "="],
+      inputType: "text",
+    },
+  ],
 };
 
 function evaluateListener(qb, container) {
