@@ -2,7 +2,6 @@
   "tasks": {
     "dev": "deno bundle src/main.ts --watch -o docs/static/fqb.min.js",
     "build": "deno bundle src/main.ts -o dist/fqb.min.js --minify",
-    "server": "python -m http.server -d docs 18080"
     "tw": "tailwindcss -w -i ./docs/static/input.css -o ./docs/static/output.css"
   },
   "compilerOptions": {
