@@ -277,6 +277,10 @@
         const rd = await fetch("./static/unstyled.js");
         const td = await rd.text();
         defaultDetails.innerText = td;
+
+        const ri = await fetch("./static/unstyledInitialized.js");
+        const ti = await ri.text();
+        defaultInitializedDetails.innerText = ti;
       });
     </script>
   </body>
