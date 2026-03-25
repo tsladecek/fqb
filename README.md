@@ -13,8 +13,21 @@ import { FQB } from "./fqb.min.js";
 
 const config = {
     rootNode: rootNode, // The node to which the component will be attached
-    nodes: {},          // Specifications for nodes used for rendering
-    attributes: [],     // A list of attributes used as filters
+    attributes: [ // must satisfy the Attribute interface
+        { name: "attr1" }, // minimal, uses default set of operators and text input
+        { name: "attr2", operators: ["=", "!="], input: function() {
+            const el = document.createElement("input")
+            el.type = "number"
+            return el
+        }}
+    ],
+    nodes: { // Optional: specifications for nodes used for rendering: must satisfy the Node interface
+      filterGroupHeaderAddFieldButton: function() {
+          const el = document.createElement("button")
+          el.innerText = "Add Field"
+          return el
+      }
+    },
 }
 
 const fqb = new FQB(config);
@@ -22,16 +35,21 @@ const fqb = new FQB(config);
 
 This will attach the QueryBuilder to the provided `rootNode`. By design, the nodes are **unstyled**; however, you can easily override them.
 
-**Example:** To make the `FieldRemoveButton` display the text "REMOVE":
+The complete list of nodes is available in [main.ts](https://github.com/tsladecek/fqb/blob/main/src/main.ts).
 
-```js
-const nodes = {
-    filterGroupContentFieldRemoveButton: () => {
-        const removeButton = document.createElement("button");
-        removeButton.innerText = "REMOVE";
-        return removeButton;
-    }
+## getFilters()
+
+The applied filters can be requested at any point with the `getFilters` method of the FQB class.
+This returns a json of followind type:
+
+```ts
+export interface AppliedFilter {
+  attribute: string;
+  operator: string;
+  value: number | string | boolean;
+
+  // relevant for filterGroup
+  condition?: Condition; // "and" / "or"
+  children?: AppliedFilter[];
 }
 ```
-
-The complete list of nodes is available in [main.ts](https://github.com/tsladecek/fqb/blob/main/src/main.ts).
