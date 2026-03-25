@@ -23,20 +23,8 @@ const cfg = {
   attributes: [
     { name: "number field", type: "number" },
     { name: "text field", type: "string" },
-    { name: "password field", type: "password" },
+    { name: "color field", type: "color" },
     { name: "date field", type: "date" },
-  ],
-  attributeTypeSpec: [
-    {
-      attributeType: "number",
-      operators: ["=", "<", ">"],
-      inputType: "number",
-    },
-    {
-      attributeType: "text",
-      operators: ["contains", "="],
-      inputType: "text",
-    },
   ],
 };
 

@@ -66,19 +66,17 @@ const nodes = {
     "grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_30px] gap-2 items-center bg-white p-2 rounded-lg border border-gray-100 shadow-sm",
     "",
   ),
-  filterGroupContentFieldInput: nodeFactory("input", inputBase, ""),
+  filterGroupContentFieldInputFallback: nodeFactory("input", inputBase, ""),
   filterGroupContentFieldAttributeSelect: nodeFactory(
     "select",
     inputBase + "font-medium",
     "",
   ),
-  filterGroupContentFieldAttributeOption: nodeFactory("option", "", ""),
   filterGroupContentFieldOperatorSelect: nodeFactory(
     "select",
     inputBase + "font-medium text-gray-500",
     "",
   ),
-  filterGroupContentFieldOperatorOption: nodeFactory("option", "", ""),
   filterGroupContentFieldRemoveButton: nodeFactory(
     "button",
     btnBase +
@@ -92,8 +90,38 @@ const cfg = {
   attributes: [
     { name: "number field", type: "number" },
     { name: "text field", type: "string" },
-    { name: "password field", type: "password" },
+    { name: "color field", type: "color" },
     { name: "date field", type: "date" },
+  ],
+  attributeTypeSpec: [
+    {
+      attributeType: "number",
+      operators: ["=", "<", ">"],
+      input: () => {
+        const el = document.createElement("input");
+        el.type = "number";
+        el.className = inputBase;
+        el.addEventListener("change", (e) => {
+          const cls = "border-red-500";
+          if (e.target.value < 0) {
+            el.classList.add(cls);
+          } else {
+            el.classList.remove(cls);
+          }
+        });
+        return el;
+      },
+    },
+    {
+      attributeType: "text",
+      operators: ["contains", "="],
+      input: () => {
+        const el = document.createElement("input");
+        el.type = "text";
+        el.className = inputBase;
+        return el;
+      },
+    },
   ],
 };
 

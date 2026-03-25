@@ -20,11 +20,14 @@ export interface ElementBase {
   classList: ClassList;
   appendChild(node: ElementBase): ElementBase;
   removeChild(node: ElementBase): ElementBase;
+  replaceChildren(...node: ElementBase[]): undefined;
   addEventListener(type: string, listener: (e?: Event) => void): void;
   children: ElementBase[];
   innerHTML: string;
   innerText: string;
 }
+
+export interface ElementSpan extends ElementBase {}
 
 export interface ElementDiv extends ElementBase {}
 
@@ -40,16 +43,20 @@ export function getChildByClass(
   return null;
 }
 
-export interface ElementInput extends ElementBase {
+export interface ElementWithValue extends ElementBase {
+  value: string;
+}
+
+export interface ElementInput extends ElementWithValue {
   value: string;
   type: string;
 }
 
-export interface ElementSelect extends ElementBase {
+export interface ElementSelect extends ElementWithValue {
   value: string;
 }
 
-export interface ElementOption extends ElementBase {
+export interface ElementOption extends ElementWithValue {
   value: string;
 }
 
@@ -59,6 +66,7 @@ export interface ElementButton extends ElementBase {
 
 export interface ElementTagNameMap {
   div: ElementDiv;
+  span: ElementSpan;
   input: ElementInput;
   select: ElementSelect;
   option: ElementOption;
@@ -79,7 +87,8 @@ export interface Nodes {
   filterGroupHeaderRemoveButton: () => ElementButton;
 
   filterGroupContentFieldContainer: () => ElementDiv;
-  filterGroupContentFieldInput: () => ElementInput;
+  filterGroupContentFieldInputContainer: () => ElementSpan;
+  filterGroupContentFieldInputFallback: () => ElementInput; // used as fallback if not declared in attributeTypeSpec
   filterGroupContentFieldAttributeSelect: () => ElementSelect;
   filterGroupContentFieldAttributeOption: () => ElementOption;
   filterGroupContentFieldOperatorSelect: () => ElementSelect;
@@ -104,7 +113,8 @@ export const ClassFilterGroupHeaderRemoveButton = `${classPrefix}FilterGroupHead
 
 // Field Constants
 export const ClassFilterGroupContentFieldContainer = `${classPrefix}FilterGroupContentFieldContainer`;
-export const ClassFilterGroupContentFieldInput = `${classPrefix}FilterGroupContentFieldInput`;
+export const ClassFilterGroupContentFieldInputContainer = `${classPrefix}FilterGroupContentFieldInputContainer`;
+export const ClassFilterGroupContentFieldInput = `${classPrefix}FilterGroupContentFieldInput`; // this doesnt have to be input, any component with .value property is valid
 export const ClassFilterGroupContentFieldAttributeSelect = `${classPrefix}FilterGroupContentFieldAttributeSelect`;
 export const ClassFilterGroupContentFieldAttributeOption = `${classPrefix}FilterGroupContentFieldAttributeOption`;
 export const ClassFilterGroupContentFieldOperatorSelect = `${classPrefix}FilterGroupContentFieldOperatorSelect`;
@@ -151,34 +161,8 @@ export interface Attribute {
 export interface AttributeTypeSpec {
   attributeType: string;
   operators: string[];
-  inputType: string;
+  input: () => ElementWithValue;
 }
-
-export const defaultAttributeTypeSpec: AttributeTypeSpec[] = [
-  // Numeric & Range-based
-  { attributeType: "number", operators: numericOperators, inputType: "text" },
-
-  //  // Textual (Exact match + Partial match)
-  { attributeType: "text", operators: textOperators, inputType: "text" },
-  { attributeType: "email", operators: textOperators, inputType: "text" },
-  { attributeType: "url", operators: textOperators, inputType: "text" },
-  { attributeType: "tel", operators: textOperators, inputType: "text" },
-  { attributeType: "password", operators: ["=", "!="], inputType: "text" },
-
-  // Temporal (Date/Time)
-  { attributeType: "date", operators: numericOperators, inputType: "text" },
-  { attributeType: "month", operators: numericOperators, inputType: "text" },
-  { attributeType: "week", operators: numericOperators, inputType: "text" },
-  { attributeType: "time", operators: numericOperators, inputType: "text" },
-  {
-    attributeType: "datetime-local",
-    operators: ["=", "!=", "<", "<=", ">", ">="],
-    inputType: "text",
-  },
-
-  // Categorical / Special
-  { attributeType: "color", operators: ["=", "!="], inputType: "text" },
-];
 
 export interface Config {
   rootNode: ElementDiv;
@@ -222,11 +206,7 @@ export class FQB {
       this.dom = document;
     }
 
-    if (cfg.attributeTypeSpec) {
-      this.attributeTypeSpec = cfg.attributeTypeSpec;
-    } else {
-      this.attributeTypeSpec = defaultAttributeTypeSpec;
-    }
+    this.attributeTypeSpec = this.newAttributeTypeSpec();
 
     this.nodes = this.newNodes();
     this.rootFilterGroup = this.newRootFilterGroup();
@@ -234,6 +214,102 @@ export class FQB {
 
   getFilters(): AppliedFilter {
     return this.filterGroupAppliedFilter(this.rootFilterGroup);
+  }
+
+  private inputElementFactory(type: string): () => ElementWithValue {
+    return () => {
+      const el = this.nodes.filterGroupContentFieldInputFallback();
+      el.type = type;
+      return el;
+    };
+  }
+
+  private newAttributeTypeSpec(): AttributeTypeSpec[] {
+    const defaultATS = [
+      // Numeric & Range-based
+      {
+        attributeType: "number",
+        operators: numericOperators,
+        input: this.inputElementFactory("number"),
+      },
+
+      //  // Textual (Exact match + Partial match)
+      {
+        attributeType: "text",
+        operators: textOperators,
+        input: this.inputElementFactory("text"),
+      },
+      {
+        attributeType: "email",
+        operators: textOperators,
+        input: this.inputElementFactory("email"),
+      },
+      {
+        attributeType: "url",
+        operators: textOperators,
+        input: this.inputElementFactory("url"),
+      },
+      {
+        attributeType: "tel",
+        operators: textOperators,
+        input: this.inputElementFactory("tel"),
+      },
+      {
+        attributeType: "password",
+        operators: ["=", "!="],
+        input: this.inputElementFactory("password"),
+      },
+
+      // Temporal (Date/Time)
+      {
+        attributeType: "date",
+        operators: numericOperators,
+        input: this.inputElementFactory("date"),
+      },
+      {
+        attributeType: "month",
+        operators: numericOperators,
+        input: this.inputElementFactory("month"),
+      },
+      {
+        attributeType: "week",
+        operators: numericOperators,
+        input: this.inputElementFactory("week"),
+      },
+      {
+        attributeType: "time",
+        operators: numericOperators,
+        input: this.inputElementFactory("time"),
+      },
+      {
+        attributeType: "datetime-local",
+        operators: ["=", "!=", "<", "<=", ">", ">="],
+        input: this.inputElementFactory("datetime-local"),
+      },
+
+      // Categorical / Special
+      {
+        attributeType: "color",
+        operators: ["=", "!="],
+        input: this.inputElementFactory("color"),
+      },
+    ];
+
+    if (!this.cfg.attributeTypeSpec) {
+      return defaultATS;
+    }
+
+    // merge
+    const ats = [...this.cfg.attributeTypeSpec];
+
+    for (const d of defaultATS) {
+      if (ats.find((a) => a.attributeType === d.attributeType)) {
+        continue;
+      }
+
+      ats.push(d);
+    }
+    return ats;
   }
 
   private elementFactory<K extends keyof ElementTagNameMap>(
@@ -309,10 +385,15 @@ export class FQB {
         ClassFilterGroupContentFieldContainer,
         this.cfg.nodes?.filterGroupContentFieldContainer,
       ),
-      filterGroupContentFieldInput: this.elementFactory(
+      filterGroupContentFieldInputContainer: this.elementFactory(
+        "span",
+        ClassFilterGroupContentFieldInputContainer,
+        this.cfg.nodes?.filterGroupContentFieldInputContainer,
+      ),
+      filterGroupContentFieldInputFallback: this.elementFactory(
         "input",
         ClassFilterGroupContentFieldInput,
-        this.cfg.nodes?.filterGroupContentFieldInput,
+        this.cfg.nodes?.filterGroupContentFieldInputFallback,
       ),
       filterGroupContentFieldAttributeSelect: this.elementFactory(
         "select",
@@ -402,12 +483,25 @@ export class FQB {
       ch,
       ClassFilterGroupContentFieldOperatorSelect,
     );
-    const input = getChildByClass(ch, ClassFilterGroupContentFieldInput);
+
+    const inputContainer = getChildByClass(
+      ch,
+      ClassFilterGroupContentFieldInputContainer,
+    );
+
+    if (!attribute || !operator || !inputContainer) {
+      this.error("failed to collect attribute, operator and field");
+    }
+
+    const input = getChildByClass(
+      inputContainer as ElementSpan,
+      ClassFilterGroupContentFieldInput,
+    );
 
     return {
       attribute: (attribute as ElementSelect).value,
       operator: (operator as ElementSelect).value,
-      value: (input as ElementInput).value,
+      value: (input as ElementWithValue).value,
     };
   }
 
@@ -485,18 +579,22 @@ export class FQB {
     // based on the type of the selected attribute
 
     // input
-    const input = this.nodes.filterGroupContentFieldInput();
+    const inputContainer = this.nodes.filterGroupContentFieldInputContainer();
 
     this.setInputAndOperatorsForAttribute(
       selectAttribute.value,
-      input,
+      inputContainer,
       selectOperator,
     );
 
     selectAttribute.addEventListener("change", (e) => {
       if (e?.target) {
         const t = e.target as ElementSelect;
-        this.setInputAndOperatorsForAttribute(t.value, input, selectOperator);
+        this.setInputAndOperatorsForAttribute(
+          t.value,
+          inputContainer,
+          selectOperator,
+        );
       }
     });
 
@@ -508,7 +606,7 @@ export class FQB {
 
     container.appendChild(selectAttribute);
     container.appendChild(selectOperator);
-    container.appendChild(input);
+    container.appendChild(inputContainer);
     container.appendChild(remove);
 
     parent.appendChild(container);
@@ -551,7 +649,7 @@ export class FQB {
 
   private setInputAndOperatorsForAttribute(
     attrName: string,
-    input: ElementInput,
+    inputContainer: ElementSpan,
     select: ElementSelect,
   ) {
     let attributeType = "text";
@@ -564,7 +662,6 @@ export class FQB {
     }
 
     let ops = defaultFilterOperators;
-    let inputType = "text";
 
     const f = this.attributeTypeSpec.find(
       (a) => a.attributeType == attributeType,
@@ -572,10 +669,15 @@ export class FQB {
 
     if (f) {
       ops = f.operators;
-      inputType = f.inputType;
+      const newInput = f.input();
+      newInput.classList.add(ClassFilterGroupContentFieldInput);
+      inputContainer.replaceChildren(newInput);
+    } else {
+      inputContainer.replaceChildren(
+        this.nodes.filterGroupContentFieldInputFallback(),
+      );
     }
 
-    input.type = inputType;
     select.innerHTML = "";
 
     for (const opt of ops) {
