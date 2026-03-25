@@ -1,4 +1,4 @@
-import { FQB } from "./fqb.min.js";
+import { FQB, NumericOperators, TextOperators } from "./fqb.min.js";
 
 const shadow = unstyled.attachShadow({ mode: "open" });
 
@@ -6,6 +6,14 @@ function nodeFactory(elementType, innerText) {
   return () => {
     const el = document.createElement(elementType);
     el.innerText = innerText;
+    return el;
+  };
+}
+
+function inputFactory(type) {
+  return () => {
+    const el = document.createElement("input");
+    el.type = type;
     return el;
   };
 }
@@ -21,10 +29,26 @@ const cfg = {
   rootNode: shadow,
   nodes: nodes,
   attributes: [
-    { name: "number field", type: "number" },
-    { name: "text field", type: "string" },
-    { name: "color field", type: "color" },
-    { name: "date field", type: "date" },
+    {
+      name: "number field",
+      input: inputFactory("number"),
+      operators: NumericOperators,
+    },
+    {
+      name: "text field",
+      input: inputFactory("text"),
+      operators: TextOperators,
+    },
+    {
+      name: "color field",
+      input: inputFactory("color"),
+      operators: ["=", "!="],
+    },
+    {
+      name: "date field",
+      input: inputFactory("date"),
+      operators: NumericOperators,
+    },
   ],
 };
 

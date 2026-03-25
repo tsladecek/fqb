@@ -19,7 +19,6 @@ import {
   ClassList,
   Event,
   FQB,
-  ElementBase,
   ClassFilterGroupContentFieldInput,
 } from "./main.ts";
 
@@ -126,12 +125,19 @@ function addField(
 
   const inp = getChildByClass(inpC, ClassFilterGroupContentFieldInput);
 
-  if (!att || !ope || !inp) {
-    throw new Error("error");
+  if (!att || !ope) {
+    throw new Error(
+      `when getting input container elements: attribute: ${att}, operator: ${ope}`,
+    );
   }
 
   (att as ElementSelect).value = attr;
   (ope as ElementSelect).value = operator;
+
+  if (!inp) {
+    return;
+  }
+
   (inp as ElementInput).value = value;
 }
 
@@ -159,10 +165,10 @@ Deno.test("happy path", () => {
   const root = document.createElement("div");
 
   const attributes: Attribute[] = [
-    { name: "attr1", type: "number" },
-    { name: "attr2", type: "password" },
-    { name: "attr3", type: "text" },
-    { name: "attr4", type: "date" },
+    { name: "attr1", operators: ["=", "!="] },
+    { name: "attr2", operators: ["contains"] },
+    { name: "attr3" },
+    { name: "attr4" },
   ];
 
   const cfg = {

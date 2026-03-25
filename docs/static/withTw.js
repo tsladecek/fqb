@@ -1,4 +1,4 @@
-import { FQB } from "./fqb.min.js";
+import { FQB, NumericOperators, TextOperators } from "./fqb.min.js";
 
 function nodeFactory(elementType, className, innerText) {
   return () => {
@@ -6,6 +6,18 @@ function nodeFactory(elementType, className, innerText) {
     el.className = className;
     if (innerText) {
       el.innerHTML = innerText;
+    }
+    return el;
+  };
+}
+
+function inputFactory(type, cls, onchange) {
+  return () => {
+    const el = document.createElement("input");
+    el.type = type;
+    el.className = cls;
+    if (onchange) {
+      el.addEventListener("change", onchange);
     }
     return el;
   };
@@ -88,39 +100,32 @@ const cfg = {
   rootNode: tailwindStyled,
   nodes: nodes,
   attributes: [
-    { name: "number field", type: "number" },
-    { name: "text field", type: "string" },
-    { name: "color field", type: "color" },
-    { name: "date field", type: "date" },
-  ],
-  attributeTypeSpec: [
     {
-      attributeType: "number",
-      operators: ["=", "<", ">"],
-      input: () => {
-        const el = document.createElement("input");
-        el.type = "number";
-        el.className = inputBase;
-        el.addEventListener("change", (e) => {
-          const cls = "border-red-500";
-          if (e.target.value < 0) {
-            el.classList.add(cls);
-          } else {
-            el.classList.remove(cls);
-          }
-        });
-        return el;
-      },
+      name: "number field",
+      input: inputFactory("number", inputBase, (e) => {
+        const cls = "border-red-500";
+        if (e.target.value < 0) {
+          e.target.classList.add(cls);
+        } else {
+          e.target.classList.remove(cls);
+        }
+      }),
+      operators: NumericOperators,
     },
     {
-      attributeType: "text",
-      operators: ["contains", "="],
-      input: () => {
-        const el = document.createElement("input");
-        el.type = "text";
-        el.className = inputBase;
-        return el;
-      },
+      name: "text field",
+      input: inputFactory("text", inputBase, null),
+      operators: TextOperators,
+    },
+    {
+      name: "color field",
+      input: inputFactory("color", inputBase, null),
+      operators: ["=", "!="],
+    },
+    {
+      name: "date field",
+      input: inputFactory("date", inputBase, null),
+      operators: NumericOperators,
     },
   ],
 };
