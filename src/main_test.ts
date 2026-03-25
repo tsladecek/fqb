@@ -2,11 +2,10 @@ import { assertEquals } from "@std/assert";
 import {
   Config,
   Attribute,
-  FilterOperator,
   AppliedFilter,
   ClassFilterGroupContentFieldAttributeSelect,
   ClassFilterGroupContentFieldOperatorSelect,
-  ClassFilterGroupContentFieldInput,
+  ClassFilterGroupContentFieldInputContainer,
   ClassFilterGroupContent,
   ClassFilterGroupHeader,
   ClassFilterGroupHeaderConditionSelect,
@@ -20,6 +19,8 @@ import {
   ClassList,
   Event,
   FQB,
+  ElementBase,
+  ClassFilterGroupContentFieldInput,
 } from "./main.ts";
 
 class MockClassList {
@@ -67,6 +68,12 @@ class MockElement
     return node;
   }
 
+  replaceChildren(...node: MockElement[]): undefined {
+    for (const child of node) {
+      this.appendChild(child);
+    }
+  }
+
   addEventListener(type: string, listener: (e?: Event) => void) {
     if (!this.listeners[type]) this.listeners[type] = [];
     this.listeners[type].push(listener);
@@ -88,7 +95,7 @@ function addField(
   qb: FQB,
   filterGroup: ElementDiv,
   attr: string,
-  operator: FilterOperator,
+  operator: string,
   value: string,
 ) {
   const fgc = getChildByClass(filterGroup, ClassFilterGroupContent);
@@ -108,7 +115,16 @@ function addField(
     container,
     ClassFilterGroupContentFieldOperatorSelect,
   );
-  const inp = getChildByClass(container, ClassFilterGroupContentFieldInput);
+  const inpC = getChildByClass(
+    container,
+    ClassFilterGroupContentFieldInputContainer,
+  );
+
+  if (!inpC) {
+    throw new Error("no input container");
+  }
+
+  const inp = getChildByClass(inpC, ClassFilterGroupContentFieldInput);
 
   if (!att || !ope || !inp) {
     throw new Error("error");
