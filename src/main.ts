@@ -503,7 +503,7 @@ export class FQB {
       selectOperator,
     );
 
-    selectAttribute.addEventListener("change", (e) => {
+    selectAttribute.addEventListener("input", (e) => {
       if (e?.target) {
         const t = e.target as ElementSelect;
         this.setInputAndOperatorsForAttribute(
