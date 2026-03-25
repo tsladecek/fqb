@@ -37,7 +37,9 @@ This will attach the QueryBuilder to the provided `rootNode`. By design, the nod
 
 The complete list of nodes is available in [main.ts](https://github.com/tsladecek/fqb/blob/main/src/main.ts).
 
-## getFilters()
+## API
+
+### getFilters()
 
 The applied filters can be requested at any point with the `getFilters` method of the FQB class.
 This returns a json of followind type:
@@ -52,4 +54,35 @@ export interface AppliedFilter {
   condition?: Condition; // "and" / "or"
   children?: AppliedFilter[];
 }
+```
+
+### initializeFromFilters(filter)
+
+When you already have the `AppliedFilter` json (maybe from a URL query param), you can initialize the
+UI with the `initializeFromFilters` function
+
+```js
+const filters = {
+  "condition": "and",
+  "children": [
+    {
+      "attribute": "number field",
+      "operator": "=",
+      "value": "123"
+    },
+    {
+      "condition": "and",
+      "children": [
+        {
+          "attribute": "text field",
+          "operator": "=",
+          "value": "test text"
+        }
+      ]
+    }
+  ]
+}
+
+const fqb = new FQB(config)
+fqb.initializeFromFilters(filters)
 ```

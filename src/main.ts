@@ -154,7 +154,7 @@ export interface Config {
 export interface AppliedFilter {
   attribute: string;
   operator: string;
-  value: number | string | boolean;
+  value: string;
 
   // relevant for filterGroup
   condition?: Condition;
@@ -566,13 +566,13 @@ export class FQB {
   private setInputAndOperatorsForAttribute(
     attrName: string,
     inputContainer: ElementSpan,
-    select: ElementSelect,
+    selectOperator: ElementSelect,
   ) {
     const attribute = this.cfg.attributes.find((a) => a.name === attrName);
 
     if (!attribute) {
       // this is likely a placeholder - an empty option, just set defaults and return
-      select.innerHTML = "";
+      selectOperator.innerHTML = "";
       inputContainer.replaceChildren(
         this.inputElementFactory("text", ClassFilterGroupContentFieldInput)(),
       );
@@ -590,13 +590,119 @@ export class FQB {
     }
 
     inputContainer.replaceChildren(attribute.input());
-    select.innerHTML = "";
+    selectOperator.innerHTML = "";
 
     for (const opt of attribute.operators) {
       const option = this.nodes.filterGroupContentFieldOperatorOption();
       option.value = opt;
       option.innerText = opt;
-      select.appendChild(option);
+      selectOperator.appendChild(option);
     }
+  }
+
+  initializeFromFilters(filter: AppliedFilter) {
+    this.initializeGroup(this.rootFilterGroup, filter);
+  }
+
+  private initializeGroup(filterGroup: ElementDiv, filter: AppliedFilter) {
+    const filterGroupHeader = getChildByClass(
+      filterGroup,
+      ClassFilterGroupHeader,
+    );
+    const filterGroupContent = getChildByClass(
+      filterGroup,
+      ClassFilterGroupContent,
+    );
+
+    if (!filterGroupHeader || !filterGroupContent) {
+      this.error("filter group header and/or content not found");
+      return;
+    }
+
+    if (!filter.condition) {
+      this.error("condition must not be null for filter group");
+      return;
+    }
+
+    this.setGroupCondition(filterGroupHeader, filter.condition);
+
+    for (const child of filter.children || []) {
+      if (child.condition) {
+        // this is a group
+        const fg = this.newFilterGroup(true, filterGroupContent);
+        this.initializeGroup(fg, child);
+      } else {
+        const ic = this.newFilterGroupField(filterGroupContent);
+        this.initializeInputContainer(ic, child);
+      }
+    }
+  }
+
+  private setGroupCondition(
+    filterGroupHeader: ElementDiv,
+    condition: Condition,
+  ) {
+    const cond = getChildByClass(
+      filterGroupHeader,
+      ClassFilterGroupHeaderConditionSelect,
+    );
+    if (!cond) {
+      this.error("no condition found in filter group header");
+      return;
+    }
+
+    (cond as ElementSelect).value = condition;
+  }
+
+  private initializeInputContainer(
+    inputContainer: ElementDiv,
+    filter: AppliedFilter,
+  ) {
+    const selectAttribute = getChildByClass(
+      inputContainer,
+      ClassFilterGroupContentFieldAttributeSelect,
+    );
+
+    if (!selectAttribute) {
+      this.error("select attribute not found");
+      return;
+    }
+
+    const selectOperator = getChildByClass(
+      inputContainer,
+      ClassFilterGroupContentFieldOperatorSelect,
+    );
+
+    if (!selectOperator) {
+      this.error("select operator not found");
+      return;
+    }
+
+    const inpC = getChildByClass(
+      inputContainer,
+      ClassFilterGroupContentFieldInputContainer,
+    );
+
+    if (!inpC) {
+      this.error("input container not found");
+      return;
+    }
+
+    (selectAttribute as ElementSelect).value = filter.attribute;
+
+    this.setInputAndOperatorsForAttribute(
+      filter.attribute,
+      inpC,
+      selectOperator as ElementSelect,
+    );
+
+    const input = getChildByClass(inpC, ClassFilterGroupContentFieldInput);
+    if (!input) {
+      this.error("input does not exist");
+      return;
+    }
+
+    (selectOperator as ElementSelect).value = filter.operator;
+    (input as ElementInput).value = filter.value;
   }
 }

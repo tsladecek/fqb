@@ -42,9 +42,7 @@
         >
           <div class="p-8">
             <div class="flex items-center justify-between mb-6">
-              <h2 class="text-2xl font-bold text-gray-900">
-                Default - Unstyled
-              </h2>
+              <h2 class="text-2xl font-bold text-gray-900">Unstyled</h2>
               <span
                 class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full uppercase tracking-wider"
                 >Minimal</span
@@ -185,6 +183,78 @@
             </div>
           </div>
         </section>
+
+        <!-- Unstyled, Initialized from Filters -->
+        <section
+          class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+        >
+          <div class="p-8">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold text-gray-900">Initialized</h2>
+              <span
+                class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full uppercase tracking-wider"
+                >Minimal - Initialized</span
+              >
+            </div>
+
+            <div
+              id="unstyledInitialized"
+              class="mb-6 p-4 border border-dashed border-gray-300 rounded-lg min-h-[100px] bg-gray-50/50"
+            ></div>
+
+            <div class="flex flex-col space-y-4">
+              <button
+                id="evaluateDefaultInitialized"
+                type="button"
+                class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-sm cursor-pointer"
+              >
+                Evaluate Query
+              </button>
+
+              <div class="space-y-2">
+                <span
+                  class="text-xs font-bold text-gray-400 uppercase tracking-widest"
+                  >Resulting JSON</span
+                >
+                <div
+                  id="defaultInitializedQueryResult"
+                  class="p-4 bg-gray-900 text-indigo-300 rounded-xl font-mono text-sm overflow-x-auto min-h-[60px] shadow-inner"
+                ></div>
+              </div>
+
+              <details
+                class="group border border-gray-200 rounded-xl overflow-hidden transition-all"
+              >
+                <summary
+                  class="flex items-center justify-between px-4 py-3 cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors list-none"
+                >
+                  <span class="text-sm font-semibold text-gray-700"
+                    >Implementation Code</span
+                  >
+                  <svg
+                    class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    ></path>
+                  </svg>
+                </summary>
+                <div class="p-0 border-t border-gray-200">
+                  <pre
+                    id="defaultInitializedDetails"
+                    class="p-4 text-sm font-mono text-gray-300 bg-gray-800 overflow-x-auto"
+                  ></pre>
+                </div>
+              </details>
+            </div>
+          </div>
+        </section>
       </main>
 
       <footer class="mt-20 text-center text-gray-400 text-sm">
@@ -197,6 +267,7 @@
 
     <script type="module" src="./static/withTw.js"></script>
     <script type="module" src="./static/unstyled.js"></script>
+    <script type="module" src="./static/unstyledInitialized.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", async () => {
         const rt = await fetch("./static/withTw.js");

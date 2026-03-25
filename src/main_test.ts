@@ -211,4 +211,10 @@ Deno.test("happy path", () => {
       },
     ],
   } as AppliedFilter);
+
+  // test with new initialized from filters
+  const newFQB = new FQB(cfg, document);
+  newFQB.initializeFromFilters(applied);
+  const newApplied = newFQB.getFilters();
+  assertEquals(newApplied, applied);
 });
