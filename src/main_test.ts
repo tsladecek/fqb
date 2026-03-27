@@ -212,6 +212,11 @@ Deno.test("happy path", () => {
     ],
   } as AppliedFilter);
 
+  // test that when existing is repetitively initialized, the children do not change
+  qb.initializeFromFilters(applied);
+  const after = qb.getFilters();
+  assertEquals(after, applied);
+
   // test with new initialized from filters
   const newFQB = new FQB(cfg, document);
   newFQB.initializeFromFilters(applied);

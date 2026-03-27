@@ -601,6 +601,18 @@ export class FQB {
   }
 
   initializeFromFilters(filter: AppliedFilter) {
+    const rootFilterGroupContent = getChildByClass(
+      this.rootFilterGroup,
+      ClassFilterGroupContent,
+    );
+    if (!rootFilterGroupContent) {
+      this.error("no filter group content found");
+      return;
+    }
+
+    for (const child of rootFilterGroupContent.children) {
+      rootFilterGroupContent.removeChild(child);
+    }
     this.initializeGroup(this.rootFilterGroup, filter);
   }
 
